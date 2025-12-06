@@ -6,7 +6,7 @@ const CreateResumeHeader = () => {
   const router = useRouter();
   const { prevFormMenu, nextFormMenu } = useCreateResumeStore();
   return (
-    <div className="w-full px-3 py-2">
+    <div className="w-full px-3 pb-2">
       <header className="flex justify-between">
         <button onClick={()=>router.push("/dashboard")} className="bg-blue-600 p-2 rounded-sm cursor-pointer">
           <Home className="w-6 h-6 text-gray-300" />

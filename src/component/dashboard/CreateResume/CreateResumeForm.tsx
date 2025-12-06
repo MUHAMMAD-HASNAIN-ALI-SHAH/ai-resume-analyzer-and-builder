@@ -1,6 +1,5 @@
 import { useState } from "react";
 import useCreateResumeStore from "../../../store/useCreateResumeStore";
-import Editor from "react-simple-wysiwyg";
 
 const CreateResumeForm = () => {
   const { formMenu } = useCreateResumeStore();
@@ -88,13 +87,15 @@ const FormSummary = () => {
       <div className="w-full space-y-3 pt-5">
         <div>
           <label htmlFor="">Add Summary</label>
-          <Editor
+          <textarea
+            rows={10}
             value={form.summary}
             onChange={(e: any) =>
               handleFormStrings({
                 target: { name: "summary", value: e?.target?.value ?? e },
               } as any)
             }
+            className="border p-2 w-full resize-none border-blue-300 focus:outline-none focus:border-blue-500"
           />
         </div>
         <div className="w-full flex justify-end">
@@ -160,11 +161,11 @@ const FormProfessionaExperience = () => {
                   />
                 </div>
                 <div className="w-full">
-                  <label htmlFor="">State</label>
+                  <label htmlFor="">Country</label>
                   <input
-                    value={experience.state}
+                    value={experience.country}
                     onChange={(e) => handleExperienceStrings(e, index)}
-                    name="state"
+                    name="country"
                     className="border p-2 w-full border-blue-300 focus:outline-none focus:border-blue-500"
                   />
                 </div>
@@ -193,9 +194,11 @@ const FormProfessionaExperience = () => {
               </div>
               <div className="mt-4">
                 <label htmlFor="">Summary</label>
-                <Editor
+                <textarea
+                  rows={7}
                   value={html[index] || experience.summary}
                   onChange={(e) => onChange(e.target.value, index)}
+                  className="border p-2 w-full resize-none border-blue-300 focus:outline-none focus:border-blue-500"
                 />
               </div>
             </div>
@@ -357,10 +360,11 @@ const FormProjects = () => {
               <div className="w-full">
                 <label htmlFor="">Description</label>
                 <textarea
+                rows={7}
                   value={project.description}
                   onChange={(e) => handleProjectStrings(e, index)}
                   name="description"
-                  className="border p-2 w-full border-blue-300 focus:outline-none focus:border-blue-500"
+                   className="border p-2 w-full resize-none border-blue-300 focus:outline-none focus:border-blue-500"
                 />
               </div>
             </div>
@@ -435,21 +439,8 @@ const FormSkills = () => {
 };
 
 const SaveAndNextButton = () => {
-  const {
-    formMenu,
-    form,
-    nextFormMenu,
-    handleCreateResumeSubmit,
-    formSubmitting,
-  } = useCreateResumeStore();
-
-  const handleSubmit = async () => {
-    await fetch("/api/create-resume", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
-  };
+  const { formMenu, form, nextFormMenu, formSubmitting } =
+    useCreateResumeStore();
 
   return (
     <div className="flex flex-row-reverse gap-3">
@@ -463,18 +454,6 @@ const SaveAndNextButton = () => {
           }`}
         >
           Save and next
-        </button>
-      )}
-      {formMenu == 6 && (
-        <button
-          disabled={formSubmitting}
-          onClick={handleSubmit}
-          type="button"
-          className={`bg-blue-600 text-white px-4 py-2 rounded-md cursor-pointer ${
-            formSubmitting ? "opacity-50 cursor-not-allowed" : ""
-          }`}
-        >
-          Save and Download
         </button>
       )}
     </div>

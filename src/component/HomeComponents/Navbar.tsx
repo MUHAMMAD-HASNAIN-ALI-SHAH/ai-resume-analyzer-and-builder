@@ -38,7 +38,7 @@ const Navbar = () => {
         <nav className="hidden md:flex items-center gap-6 font-medium">
           <h1
             onClick={()=>router.push("/dashboard")}
-            className="ml-4 px-4 py-2 bg-linear-to-r from-cyan-400 to-blue-600 text-white rounded-full font-semibold shadow-md hover:scale-105 transition-transform"
+            className="ml-4 px-4 py-2 bg-linear-to-r cursor-pointer select-none from-cyan-400 to-blue-600 text-white rounded-full font-semibold shadow-md hover:scale-105 transition-transform"
           >
             Get Started
           </h1>

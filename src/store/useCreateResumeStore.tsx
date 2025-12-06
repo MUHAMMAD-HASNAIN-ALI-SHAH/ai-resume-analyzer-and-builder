@@ -14,7 +14,7 @@ export interface CreateResume {
     positiontitle: string;
     companyname: string;
     city: string;
-    state: string;
+    country: string;
     startdate: string;
     enddate: string;
     summary: string;
@@ -196,7 +196,7 @@ const useCreateResumeStore = create<CreateResumeState>((set, get) => ({
             positiontitle: "",
             companyname: "",
             city: "",
-            state: "",
+            country: "",
             startdate: "",
             enddate: "",
             summary: "",

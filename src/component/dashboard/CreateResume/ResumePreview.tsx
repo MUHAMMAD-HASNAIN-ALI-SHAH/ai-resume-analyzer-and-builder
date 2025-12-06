@@ -1,67 +1,139 @@
 import { useRef } from "react";
-import { useReactToPrint } from "react-to-print";
 import useCreateResumeStore from "../../../store/useCreateResumeStore";
 
-interface ResumePreviewProps {
-  isOpen: boolean;
-  onClose: () => void;
-  children?: React.ReactNode;
-}
-
-const ResumePreview: React.FC<ResumePreviewProps> = ({ isOpen, onClose }) => {
-  const { form, formSubmitted } = useCreateResumeStore();
+const ResumePreview = () => {
+  const { form } = useCreateResumeStore();
   const resumeRef = useRef<HTMLDivElement>(null);
 
-  const handlePrint = useReactToPrint({
-    contentRef: resumeRef,
-    documentTitle: `${form.fullname || "resume"}`,
-  });
+  const onSubmit = async () => {
+    const res = await fetch("/api/create-resume", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form),
+    });
 
-  if (!isOpen) return null;
+    if (!res.ok) {
+      console.error("Failed to generate PDF");
+      return;
+    }
+
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "resume.pdf";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  };
 
   return (
     <div
-      className="fixed inset-0 bg-black/50 text-black bg-opacity-50 flex justify-center items-center z-50"
-      onClick={onClose} // Close when clicking background
+      style={{
+        color: "black",
+        display: "flex",
+        flexDirection: "column",
+        gap: "1.25rem",
+        justifyContent: "center",
+        alignItems: "center",
+        zIndex: 50,
+      }}
     >
+      <button
+        type="button"
+        onClick={onSubmit}
+        style={{
+          backgroundColor: "#10B981",
+          color: "white",
+          padding: "0.5rem 1rem",
+          borderRadius: "0.375rem",
+          cursor: "pointer",
+          border: "none",
+        }}
+      >
+        Download Resume
+      </button>
+
       <div
-        className="relative bg-white rounded-lg shadow-lg w-[90%] h-[90%] p-6 overflow-auto"
+        style={{
+          backgroundColor: "white",
+          borderRadius: "0.5rem",
+          border: "1px solid #D1D5DB",
+          width: "90%",
+          height: "90%",
+          padding: "1.5rem",
+          overflow: "auto",
+        }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Close Button */}
-        <button
-          onClick={onClose}
-          className="absolute top-3 right-3 text-gray-600 hover:text-gray-900 text-xl font-bold"
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "1rem",
+            minHeight: "40vh",
+          }}
         >
-          ✖
-        </button>
-
-        <div className="flex flex-col items-center gap-4 mr-5 mt-5 min-h-[40vh]">
-          {formSubmitted && (
-            <button
-              type="button"
-              onClick={handlePrint}
-              className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition"
-            >
-              Download PDF
-            </button>
-          )}
-
           <div
             ref={resumeRef}
-            className="bg-white print:bg-white print:text-black print:shadow-none p-4 sm:p-6 font-sans w-full max-w-[800px] mx-auto text-xs sm:text-sm md:text-base print:w-[800px] print:mx-auto"
+            style={{
+              backgroundColor: "white",
+              padding: "1rem 1.5rem",
+              fontFamily: "sans-serif",
+              width: "100%",
+              maxWidth: "800px",
+              margin: "0 auto",
+              fontSize: "14px",
+              lineHeight: 1.5,
+            }}
           >
             {/* Name */}
-            <h1 className="text-lg sm:text-xl font-semibold text-center">
+            <h1
+              style={{
+                textAlign: "center",
+                fontSize: "24px",
+                fontWeight: 600,
+                marginBottom: "0.25rem",
+              }}
+            >
               {form.fullname}
             </h1>
-            <p className="text-center font-bold text-lg sm:text-2xl text-green-500 print:text-black">
+            <p
+              style={{
+                textAlign: "center",
+                fontWeight: 700,
+                fontSize: "20px",
+                color: "#10B981",
+                marginBottom: "0.25rem",
+              }}
+            >
               {form.jobtitle}
             </p>
-            <p className="text-center text-sm sm:text-md">{form.address}</p>
+            <p
+              style={{
+                textAlign: "center",
+                fontSize: "16px",
+                color: "black",
+                fontWeight: 500,
+                marginBottom: "0.5rem",
+              }}
+            >
+              {form.address}
+            </p>
 
             {/* Contact */}
-            <div className="flex flex-col sm:flex-row justify-between mt-2 text-xs sm:text-sm text-gray-600 gap-1 sm:gap-0 print:text-black">
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                marginTop: "0.5rem",
+                marginBottom: "0.5rem",
+                fontSize: "12px",
+                color: "black",
+              }}
+            >
               <p>{form.phone}</p>
               <p>{form.email}</p>
             </div>
@@ -69,41 +141,79 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({ isOpen, onClose }) => {
             {/* Summary */}
             {form.summary &&
               form.summary.replace(/<[^>]*>/g, "").trim() !== "" && (
-                <div className="mt-3">
-                  <hr className="border-green-500 mb-1" />
-                  <div
-                    className="mt-1"
-                    dangerouslySetInnerHTML={{ __html: form.summary }}
+                <div style={{ marginBottom: "1.5rem" }}>
+                  <h2
+                    style={{
+                      fontSize: "16px",
+                      fontWeight: 600,
+                      textAlign: "center",
+                      color: "#10B981",
+                      textTransform: "uppercase",
+                      marginBottom: "0.25rem",
+                    }}
+                  >
+                    Summary
+                  </h2>
+                  <hr
+                    style={{
+                      border: "1px solid #10B981",
+                      marginBottom: "0.5rem",
+                    }}
                   />
+                  <p>{form.summary}</p>
                 </div>
               )}
 
             {/* Experience */}
             {form.experience?.length > 0 && (
-              <div className="mt-3">
-                <h2 className="text-base sm:text-lg font-semibold text-center text-green-500 uppercase print:text-black">
+              <div style={{ marginBottom: "1.5rem" }}>
+                <h2
+                  style={{
+                    fontSize: "16px",
+                    fontWeight: 600,
+                    textAlign: "center",
+                    color: "#10B981",
+                    textTransform: "uppercase",
+                    marginBottom: "0.25rem",
+                  }}
+                >
                   Professional Experience
                 </h2>
-                <hr className="border-green-500 mb-1" />
+                <hr
+                  style={{
+                    border: "1px solid #10B981",
+                    marginBottom: "0.5rem",
+                  }}
+                />
                 {form.experience.map((exp, index) => (
-                  <div key={index} className="mt-2 mb-5">
-                    <h3 className="font-bold text-green-500 print:text-black">
+                  <div key={index} style={{ marginBottom: "1rem" }}>
+                    <h3
+                      style={{
+                        fontWeight: 700,
+                        color: "#10B981",
+                        marginBottom: "0.25rem",
+                      }}
+                    >
                       {exp.positiontitle}
                     </h3>
-                    <div className="flex flex-col sm:flex-row justify-between text-xs sm:text-sm">
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        fontSize: "12px",
+                        marginBottom: "0.25rem",
+                      }}
+                    >
                       <p>
                         {exp.companyname}
                         {exp.city ? "," : ""} {exp.city}
-                        {exp.state ? "," : ""} {exp.state}
+                        {exp.country ? "," : ""} {exp.country}
                       </p>
                       <p>
                         {exp.startdate} {exp.enddate ? "-" : ""} {exp.enddate}
                       </p>
                     </div>
-                    <div
-                      className="mt-1"
-                      dangerouslySetInnerHTML={{ __html: exp.summary }}
-                    />
+                    <div dangerouslySetInnerHTML={{ __html: exp.summary }} />
                   </div>
                 ))}
               </div>
@@ -111,21 +221,48 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({ isOpen, onClose }) => {
 
             {/* Education */}
             {form.education?.length > 0 && (
-              <div className="mt-6">
-                <h2 className="text-base sm:text-lg font-semibold text-center text-green-500 uppercase print:text-black">
+              <div style={{ marginBottom: "1.5rem" }}>
+                <h2
+                  style={{
+                    fontSize: "16px",
+                    fontWeight: 600,
+                    textAlign: "center",
+                    color: "#10B981",
+                    textTransform: "uppercase",
+                    marginBottom: "0.25rem",
+                  }}
+                >
                   Education
                 </h2>
-                <hr className="border-green-500 mb-1" />
+                <hr
+                  style={{
+                    border: "1px solid #10B981",
+                    marginBottom: "0.5rem",
+                  }}
+                />
                 {form.education.map((edu, index) => (
-                  <div key={index} className="mb-6 p-2 sm:p-4 print:p-0">
-                    <h3 className="text-sm sm:text-lg font-semibold text-green-700 print:text-black">
-                      {edu.universityname}
-                      <span className="text-gray-600 font-medium">
-                        {" "}
-                        — {edu.degree}
-                      </span>
+                  <div key={index} style={{ marginBottom: "1rem" }}>
+                    <h3
+                      style={{
+                        fontSize: "14px",
+                        fontWeight: 600,
+                        color: "#10B981",
+                        marginBottom: "0.25rem",
+                      }}
+                    >
+                      {edu.universityname}{" "}
                     </h3>
-                    <div className="flex flex-col sm:flex-row justify-between text-xs sm:text-sm text-gray-500 mt-1 print:text-black">
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        fontSize: "12px",
+                        marginBottom: "0.25rem",
+                      }}
+                    >
+                      <p>
+                        {edu.degree}
+                      </p>
                       <p>
                         {edu.startdate} — {edu.enddate}
                       </p>
@@ -137,23 +274,60 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({ isOpen, onClose }) => {
 
             {/* Projects */}
             {form.projects?.length > 0 && (
-              <div className="mt-6">
-                <h2 className="text-base sm:text-lg font-semibold text-center text-green-500 uppercase print:text-black">
+              <div style={{ marginBottom: "1.5rem" }}>
+                <h2
+                  style={{
+                    fontSize: "16px",
+                    fontWeight: 600,
+                    textAlign: "center",
+                    color: "#10B981",
+                    textTransform: "uppercase",
+                    marginBottom: "0.25rem",
+                  }}
+                >
                   Projects
                 </h2>
-                <hr className="border-green-500 mb-1" />
+                <hr
+                  style={{
+                    border: "1px solid #10B981",
+                    marginBottom: "0.5rem",
+                  }}
+                />
                 {form.projects.map((pro, index) => (
-                  <div key={index} className="mb-6 p-2 sm:p-4 print:p-0">
-                    <div className="flex flex-row justify-between items-center text-xs sm:text-sm text-gray-500 mt-1 print:text-black">
-                      <h3 className="text-sm sm:text-lg font-semibold text-green-700 print:text-black">
+                  <div key={index} style={{ marginBottom: "1rem" }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        fontSize: "12px",
+                        color: "#6B7280",
+                        marginBottom: "0.25rem",
+                      }}
+                    >
+                      <h3
+                        style={{
+                          fontSize: "14px",
+                          fontWeight: 600,
+                          color: "#10B981",
+                        }}
+                      >
                         {pro.projectname}
                       </h3>
-                      <h3>
+                      <p style={{
+                        color: "black"
+                      }}>
                         {pro.startdate} — {pro.enddate}
-                      </h3>
+                      </p>
                     </div>
                     {pro.description && (
-                      <p className="mt-3 text-gray-700 leading-relaxed print:text-black">
+                      <p
+                        style={{
+                          marginTop: "0.5rem",
+                          color: "black",
+                          lineHeight: 1.5,
+                        }}
+                      >
                         {pro.description}
                       </p>
                     )}
@@ -164,14 +338,37 @@ const ResumePreview: React.FC<ResumePreviewProps> = ({ isOpen, onClose }) => {
 
             {/* Skills */}
             {form.skills?.length > 0 && (
-              <div className="mt-6">
-                <h2 className="text-base sm:text-lg font-semibold text-center text-green-500 uppercase print:text-black">
+              <div style={{ marginBottom: "1.5rem" }}>
+                <h2
+                  style={{
+                    fontSize: "16px",
+                    fontWeight: 600,
+                    textAlign: "center",
+                    color: "#10B981",
+                    textTransform: "uppercase",
+                    marginBottom: "0.25rem",
+                  }}
+                >
                   Skills
                 </h2>
-                <hr className="border-green-500 mb-1" />
-                <ul className="list-disc grid grid-cols-2 sm:grid-cols-5 pl-5 mt-3 text-xs sm:text-sm print:text-black">
+                <hr
+                  style={{
+                    border: "1px solid #10B981",
+                    marginBottom: "0.5rem",
+                  }}
+                />
+                <ul
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(2, 1fr)",
+                    paddingLeft: "1rem",
+                    gap: "0.5rem",
+                    listStyleType: "disc",
+                    marginTop: "0.5rem",
+                  }}
+                >
                   {form.skills.map((skill, index) => (
-                    <li key={index} className="text-gray-700 print:text-black">
+                    <li key={index} style={{ color: "#374151" }}>
                       {skill.name}
                     </li>
                   ))}
