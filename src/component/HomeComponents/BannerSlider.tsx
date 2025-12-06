@@ -1,21 +1,22 @@
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import Image from "next/image";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 const slides = [
   {
-    image: 'https://helloi.ai/wp-content/uploads/elementor/thumbs/ai-resume-builder-qpa8fir5niayzt9g03ab11oc3hj0t0ooz716qqyfs6.jpeg',
-    title: 'Build Resume',
-    subtitle: 'AI-powered suggestions',
+    image: "https://helloi.ai/wp-content/uploads/elementor/thumbs/ai-resume-builder-qpa8fir5niayzt9g03ab11oc3hj0t0ooz716qqyfs6.jpeg",
+    title: "Build Resume",
+    subtitle: "AI-powered suggestions",
   },
   {
-    image: 'https://www.flexjobs.com/blog/wp-content/uploads/2019/03/10061416/set-apart.png',
-    title: 'Stand Out',
-    subtitle: 'Make your CV shine fast',
+    image: "https://www.flexjobs.com/blog/wp-content/uploads/2019/03/10061416/set-apart.png",
+    title: "Stand Out",
+    subtitle: "Make your CV shine fast",
   },
   {
-    image: 'https://www.shutterstock.com/image-photo/youre-hired-260nw-623590175.jpg',
-    title: 'Get Noticed',
-    subtitle: 'Smart templates & designs',
+    image: "https://www.shutterstock.com/image-photo/youre-hired-260nw-623590175.jpg",
+    title: "Get Noticed",
+    subtitle: "Smart templates & designs",
   },
 ];
 
@@ -25,7 +26,7 @@ const BannerSlider = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       setIndex((prev) => (prev + 1) % slides.length);
-    }, 5000); // 5 seconds per slide
+    }, 5000);
     return () => clearInterval(interval);
   }, []);
 
@@ -40,10 +41,13 @@ const BannerSlider = () => {
           transition={{ duration: 1 }}
           className="absolute w-full h-full"
         >
-          <img
+          <Image
             src={slides[index].image}
             alt={slides[index].title}
-            className="w-full h-full object-cover object-center"
+            layout="fill"
+            objectFit="cover"
+            objectPosition="center"
+            priority
           />
           <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center text-center px-4">
             <motion.h2
@@ -66,13 +70,12 @@ const BannerSlider = () => {
         </motion.div>
       </AnimatePresence>
 
-      {/* Dots navigation */}
       <div className="absolute bottom-4 md:bottom-8 w-full flex justify-center gap-3">
         {slides.map((_, i) => (
           <span
             key={i}
             className={`w-3 h-3 md:w-4 md:h-4 rounded-full transition-all duration-300 ${
-              i === index ? 'bg-white scale-125' : 'bg-white/50'
+              i === index ? "bg-white scale-125" : "bg-white/50"
             }`}
           />
         ))}

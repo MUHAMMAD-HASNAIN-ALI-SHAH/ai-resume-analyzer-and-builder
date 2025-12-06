@@ -34,8 +34,10 @@ const useResumeAnalyserStore = create<ResumeAnalyserState>((set, get) => ({
     file: null,
     extractedText: "",
   },
+
   submitForAnalysis: false,
   submitting: false,
+
   atsString: {
     atsScore: 0,
     atsPoints: [],
@@ -74,6 +76,7 @@ const useResumeAnalyserStore = create<ResumeAnalyserState>((set, get) => ({
   getResumeATSScore: async () => {
     console.log("Starting ATS score retrieval...");
     const { form } = get();
+
     if (!form.file) {
       toast.error("Please upload a resume file.");
       return;
@@ -87,94 +90,72 @@ const useResumeAnalyserStore = create<ResumeAnalyserState>((set, get) => ({
     try {
       set({ submitting: true, submitForAnalysis: true });
 
-      // 1️⃣ Get Score & Keywords
-      let aiExKeyWordFromResume: any = await ai.models.generateContent({
+      // 1️⃣ Extract Resume Keywords
+      const aiExKeyWordFromResume = await ai.models.generateContent({
         model: "gemini-2.0-flash",
         contents: `
           You are a strict keyword extraction engine.
-          
-          Task:
-          1. Extract keywords from the resume text.
-          2. Return ONLY a JSON array of keywords like this:
-            ["firstkeyword", "secondkeyword", ...]
-          3. If the resume text is empty or contains no extractable keywords, return an empty array: []
-
-          Important: Do NOT include any explanations, text, or formatting outside of the JSON array.
+          Extract keywords from the resume text.
+          Return ONLY JSON array like:
+          ["keyword1", "keyword2"]
 
           Resume text:
           ${form.extractedText}
         `,
       });
 
-      let aiExKeyWordFromDescription: any = await ai.models.generateContent({
+      // 2️⃣ Extract Job Description Keywords
+      const aiExKeyWordFromDescription = await ai.models.generateContent({
         model: "gemini-2.0-flash",
         contents: `
-          You are a strict keyword extraction engine.
-
-          Task:
-          1. Extract keywords only from the job description and related fields.
-          2. Return ONLY a JSON array of keywords like this:
-            ["firstkeyword", "secondkeyword", ...]
-          3. If there are no extractable keywords or the input is empty, return an empty array: []
-
-          Important:
-          - Do NOT include any explanations, text, or formatting outside the JSON array.
-          - Do NOT return any null, undefined, or other string values.
+          Extract keywords from:
+          - Company Name
+          - Position Title
+          - Company Description
+          Return ONLY JSON array.
 
           Input:
-          Company Name: ${form.companyName}
-          Position Title: ${form.positiontitle}
-          Company Description: ${form.companyDescription}
+          ${form.companyName}
+          ${form.positiontitle}
+          ${form.companyDescription}
         `,
       });
 
-      let resumeKeywords = JSON.parse(
-        aiExKeyWordFromResume.text
+      const resumeKeywords = JSON.parse(
+        (aiExKeyWordFromResume.text ?? "[]")
           .replace(/```json/g, "")
           .replace(/```/g, "")
           .trim()
       );
 
-      let descriptionKeywords = JSON.parse(
-        aiExKeyWordFromDescription.text
+      const descriptionKeywords = JSON.parse(
+        (aiExKeyWordFromDescription.text ?? "[]")
           .replace(/```json/g, "")
           .replace(/```/g, "")
           .trim()
       );
 
-      // comparing the keywords using semantic similarity manually
-      let aiATSResult: any = await ai.models.generateContent({
+      // 3️⃣ Compare Keywords + Generate ATS Result
+      const aiATSResult = await ai.models.generateContent({
         model: "gemini-2.0-flash",
         contents: `
-          You are an ATS resume analyzer.
-          Compare the following two sets of keywords:
+          You are an ATS analyzer.
+          Compare:
 
           Resume Keywords: ${JSON.stringify(resumeKeywords)}
-          Job Description Keywords: ${JSON.stringify(descriptionKeywords)}
-          If theres no or very less Keywords on Job Description just ony Analyse the Resume Keywords.
-          Provide an ATS score out of 100 based on the keyword match and relevance.
-          Also provide detailed points explaining the score and any missing keywords from the job description that are not in the resume.
-          Respond in this JSON format:
+          Job Keywords: ${JSON.stringify(descriptionKeywords)}
+
+          Return JSON:
           {
             "atsScore": number,
-            "atsPoints": [
-              {
-                "point": "point title",
-                "description": "detailed description"
-              }
-            ],
-            "atsMissingKeywords": [
-              {
-                "missingKeyword": "keyword",
-                "reason": "why it's important"
-              }
-            ]
+            "atsPoints": [{ "point": "", "description": "" }],
+            "atsMissingKeywords": [{ "missingKeyword": "", "reason": "" }]
           }
         `,
       });
 
-      let atsResult = JSON.parse(
-        aiATSResult.text
+      const atsResult = JSON.parse(
+        (aiATSResult.text ?? "{}")
           .replace(/```json/g, "")
           .replace(/```/g, "")
           .trim()
@@ -195,6 +176,7 @@ const useResumeAnalyserStore = create<ResumeAnalyserState>((set, get) => ({
       toast.error("Failed to get ATS score");
     }
   },
+
   reset: () =>
     set({
       form: {

@@ -4,12 +4,10 @@ import CreateResumeForm from "@/component/dashboard/CreateResume/CreateResumeFor
 import CreateResumeHeader from "@/component/dashboard/CreateResume/CreateResumeHeader";
 import ResumePreview from "@/component/dashboard/CreateResume/ResumePreview";
 import useCreateResumeStore from "@/store/useCreateResumeStore";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 const CreateResumeMain = () => {
   const { reset } = useCreateResumeStore();
-  const router = useRouter();
 
   useEffect(() => {
     reset();

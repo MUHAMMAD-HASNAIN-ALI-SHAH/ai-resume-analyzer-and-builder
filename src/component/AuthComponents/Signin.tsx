@@ -1,4 +1,5 @@
 import { signIn } from "@/lib/auth";
+import Image from "next/image";
 
 const Signin = () => {
   return (
@@ -8,7 +9,7 @@ const Signin = () => {
         {/* Logo */}
         <div className="flex items-center justify-center lg:justify-start mb-6">
           <div className="w-14 h-14 bg-white shadow-md rounded-full flex items-center justify-center overflow-hidden">
-            <img
+            <Image
               src="/logo.png"
               alt="Logo"
               className="w-full h-full object-cover"

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 const Navbar = () => {
   const router = useRouter();
@@ -13,7 +14,7 @@ const Navbar = () => {
         <div className="flex items-center gap-3">
           {/* Logo Circle with Gradient */}
           <div className="w-12 h-12 rounded-full bg-linear-to-br flex items-center justify-center shadow-xl ">
-            <img
+            <Image
               src="./logo.png"
               alt="Logo"
               className="w-15 h-15 object-cover"

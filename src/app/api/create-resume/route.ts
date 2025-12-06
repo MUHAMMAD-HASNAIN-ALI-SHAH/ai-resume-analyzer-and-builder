@@ -2,8 +2,58 @@ import { auth } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import puppeteer from "puppeteer";
 
-function generateResumeHTML(data: any) {
+// ==========================
+//      TYPES
+// ==========================
+
+interface ExperienceItem {
+  positiontitle: string;
+  companyname: string;
+  city?: string;
+  country?: string;
+  startdate: string;
+  enddate?: string;
+  summary?: string;
+}
+
+interface EducationItem {
+  universityname: string;
+  degree: string;
+  startdate: string;
+  enddate: string;
+}
+
+interface ProjectItem {
+  projectname: string;
+  startdate: string;
+  enddate: string;
+  description?: string;
+}
+
+interface SkillItem {
+  name: string;
+}
+
+export interface ResumeData {
+  fullname: string;
+  jobtitle: string;
+  address: string;
+  phone: string;
+  email: string;
+  summary?: string;
+  experience?: ExperienceItem[];
+  education?: EducationItem[];
+  projects?: ProjectItem[];
+  skills?: SkillItem[];
+}
+
+// ==========================
+//    HTML GENERATOR
+// ==========================
+
+function generateResumeHTML(data: ResumeData) {
   const cleanSummary = data.summary?.replace(/<[^>]*>/g, "").trim();
+
   return `
   <html>
     <head>
@@ -26,150 +76,107 @@ function generateResumeHTML(data: any) {
     <body>
       <div style="width:100%; max-width:800px; margin:0 auto;">
 
-        <!-- Name & Job -->
-        <h1 style="text-align:center; font-weight:600; font-size:24px; color:black; margin-bottom:0.25rem;">${
-          data.fullname
-        }</h1>
-        <p style="text-align:center; font-weight:700; font-size:20px; color:#10B981; margin-bottom:0.25rem;">${
-          data.jobtitle
-        }</p>
-        <p style="text-align:center; font-weight:500; font-size:16px; color:black; margin-bottom:0.5rem;">${
-          data.address
-        }</p>
+        <h1 style="text-align:center; font-weight:600; font-size:24px; color:black; margin-bottom:0.25rem;">
+          ${data.fullname}
+        </h1>
 
-        <!-- Contact -->
+        <p style="text-align:center; font-weight:700; font-size:20px; color:#10B981; margin-bottom:0.25rem;">
+          ${data.jobtitle}
+        </p>
+
+        <p style="text-align:center; font-weight:500; font-size:16px; color:black; margin-bottom:0.5rem;">
+          ${data.address}
+        </p>
+
         <div style="display:flex; justify-content:space-between; font-size:12px; color:black; margin-top:0.5rem; margin-bottom:0.5rem;">
           <p>${data.phone}</p>
           <p>${data.email}</p>
         </div>
 
-        <!-- Summary -->
-        ${
-          cleanSummary
-            ? `
-              <div class="section">
-                <h2>Summary</h2>
-                <hr/>
-                <div>${data.summary}</div>
-              </div>`
-            : ""
-        }
+        ${cleanSummary ? `
+          <div class="section">
+            <h2>Summary</h2>
+            <hr/>
+            <div>${data.summary}</div>
+          </div>` : ""}
 
-        ${
-          data.experience?.length
-            ? `
-              <div style="margin-bottom: 1.5rem;">
-                <h2 style="font-size: 16px; font-weight: 600; text-align: center; color: #10B981; text-transform: uppercase; margin-bottom: 0.25rem;">
-                  Professional Experience
-                </h2>
-                <hr style="border: 1px solid #10B981; margin-bottom: 0.5rem;" />
-                ${data.experience
-                  .map(
-                    (exp: any) => `
-                <div style="margin-bottom: 1rem;">
-                  <h3 style="font-weight: 700; color: #10B981; margin-bottom: 0.25rem;">
-                    ${exp.positiontitle}
-                  </h3>
-                  <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 0.25rem;">
-                    <p>${exp.companyname}${exp.city ? "," : ""} ${exp.city}${
-                      exp.country ? "," : ""
-                    } ${exp.country}</p>
-                    <p>${exp.startdate} ${exp.enddate ? "-" : ""} ${
-                      exp.enddate
-                    }</p>
-                  </div>
-                  <div>${exp.summary}</div>
-                </div>
-                `
-                  )
-                  .join("")}
-              </div>
-              `
-            : ""
-        }
-
-
-        ${
-          data.education?.length
-            ? `
-            <div style="margin-bottom: 1.5rem;">
-              <h2 style="font-size: 16px; font-weight: 600; text-align: center; color: #10B981; text-transform: uppercase; margin-bottom: 0.25rem;">
-                Education
-              </h2>
-              <hr style="border: 1px solid #10B981; margin-bottom: 0.5rem;" />
-              ${data.education
-                .map(
-                  (edu: any) => `
-              <div style="margin-bottom: 1rem;">
-                <h3 style="font-size: 14px; font-weight: 600; color: #10B981; margin-bottom: 0.25rem;">
-                  ${edu.universityname}
-                </h3>
-                <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 0.25rem;">
-                  <p>${edu.degree}</p>
-                  <p>${edu.startdate} — ${edu.enddate}</p>
-                </div>
-              </div>
-              `
-                )
-                .join("")}
-            </div>
-            `
-            : ""
-        }
-
-
-       ${
-         data.projects?.length
-           ? `
+        ${data.experience?.length ? `
           <div style="margin-bottom: 1.5rem;">
-            <h2 style="font-size: 16px; font-weight: 600; text-align: center; color: #10B981; text-transform: uppercase; margin-bottom: 0.25rem;">
-              Projects
-            </h2>
-            <hr style="border: 1px solid #10B981; margin-bottom: 0.5rem;" />
-            ${data.projects
+            <h2>Professional Experience</h2>
+            <hr/>
+            ${data.experience
               .map(
-                (pro: any) => `
+                (exp: ExperienceItem) => `
             <div style="margin-bottom: 1rem;">
-              <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #6B7280; margin-bottom: 0.25rem;">
-                <h3 style="font-size: 14px; font-weight: 600; color: #10B981;">${
-                  pro.projectname
-                }</h3>
-                <p style="color: black;">${pro.startdate} — ${pro.enddate}</p>
+              <h3>${exp.positiontitle}</h3>
+              <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 0.25rem;">
+                <p>${exp.companyname}${exp.city ? "," : ""} ${exp.city ?? ""}${exp.country ? "," : ""} ${exp.country ?? ""}</p>
+                <p>${exp.startdate} ${exp.enddate ? "-" : ""} ${exp.enddate ?? ""}</p>
               </div>
-              ${
-                pro.description
-                  ? `<p style="margin-top: 0.5rem; color: black; line-height: 1.5;">${pro.description}</p>`
-                  : ""
-              }
-            </div>
-            `
+              <div>${exp.summary ?? ""}</div>
+            </div>`
               )
               .join("")}
           </div>
-          `
-           : ""
-       }
+        ` : ""}
 
+        ${data.education?.length ? `
+          <div style="margin-bottom: 1.5rem;">
+            <h2>Education</h2>
+            <hr/>
+            ${data.education
+              .map(
+                (edu: EducationItem) => `
+            <div style="margin-bottom: 1rem;">
+              <h3>${edu.universityname}</h3>
+              <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 0.25rem;">
+                <p>${edu.degree}</p>
+                <p>${edu.startdate} — ${edu.enddate}</p>
+              </div>
+            </div>`
+              )
+              .join("")}
+          </div>
+        ` : ""}
 
-        <!-- Skills -->
-        ${
-          data.skills?.length
-            ? `
-        <div class="section">
-          <h2>Skills</h2>
-          <hr/>
-          <ul class="skills">
-            ${data.skills.map((s: any) => `<li>${s.name}</li>`).join("")}
-          </ul>
-        </div>`
-            : ""
-        }
+        ${data.projects?.length ? `
+          <div style="margin-bottom: 1.5rem;">
+            <h2>Projects</h2>
+            <hr/>
+            ${data.projects
+              .map(
+                (pro: ProjectItem) => `
+            <div style="margin-bottom: 1rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #6B7280; margin-bottom: 0.25rem;">
+                <h3 style="color:#10B981;">${pro.projectname}</h3>
+                <p style="color:black;">${pro.startdate} — ${pro.enddate}</p>
+              </div>
+              ${pro.description ? `<p style="margin-top: 0.5rem; color: black; line-height: 1.5;">${pro.description}</p>` : ""}
+            </div>`
+              )
+              .join("")}
+          </div>
+        ` : ""}
+
+        ${data.skills?.length ? `
+          <div class="section">
+            <h2>Skills</h2>
+            <hr/>
+            <ul class="skills">
+              ${data.skills.map((s: SkillItem) => `<li>${s.name}</li>`).join("")}
+            </ul>
+          </div>
+        ` : ""}
 
       </div>
     </body>
   </html>
   `;
 }
+
+// ==========================
+//          API
+// ==========================
 
 export async function POST(req: Request) {
   try {
@@ -183,13 +190,10 @@ export async function POST(req: Request) {
       );
     }
 
-    // Get resume data from frontend
-    const data = await req.json();
+    const data: ResumeData = await req.json();
 
-    // Convert resume data into HTML
     const html = generateResumeHTML(data);
 
-    // Launch puppeteer
     const browser = await puppeteer.launch({
       headless: true,
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
@@ -198,7 +202,6 @@ export async function POST(req: Request) {
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: "networkidle0" });
 
-    // Generate PDF
     const pdfBuffer = await page.pdf({
       format: "A4",
       printBackground: true,
@@ -206,7 +209,6 @@ export async function POST(req: Request) {
 
     await browser.close();
 
-    // Return PDF file
     return new Response(Buffer.from(pdfBuffer), {
       status: 200,
       headers: {
@@ -214,12 +216,15 @@ export async function POST(req: Request) {
         "Content-Disposition": `attachment; filename="resume.pdf"`,
       },
     });
-  } catch (error: any) {
-    console.error(error);
+  } catch (error: unknown) {
+    const err = error as Error;
+
+    console.error(err);
+
     return NextResponse.json(
       {
         message: "Error generating PDF",
-        error: error.message,
+        error: err.message,
       },
       { status: 500 }
     );
