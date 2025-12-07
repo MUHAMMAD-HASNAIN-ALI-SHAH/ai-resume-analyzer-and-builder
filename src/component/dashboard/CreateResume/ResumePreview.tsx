@@ -1,31 +1,43 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import useCreateResumeStore from "../../../store/useCreateResumeStore";
 
 const ResumePreview = () => {
   const { form } = useCreateResumeStore();
   const resumeRef = useRef<HTMLDivElement>(null);
+  const [loader, setLoader] = useState(false);
 
   const onSubmit = async () => {
-    const res = await fetch("/api/create-resume", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
+    if (loader) return;
 
-    if (!res.ok) {
-      console.error("Failed to generate PDF");
-      return;
+    setLoader(true);
+    try {
+      const res = await fetch("/api/create-resume", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+
+      if (!res.ok) {
+        console.error("Failed to generate PDF");
+        alert("Failed to generate PDF");
+        return;
+      }
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "resume.pdf";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Something went wrong");
+    } finally {
+      setLoader(false);
     }
-
-    const blob = await res.blob();
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "resume.pdf";
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    window.URL.revokeObjectURL(url);
   };
 
   return (
@@ -43,16 +55,18 @@ const ResumePreview = () => {
       <button
         type="button"
         onClick={onSubmit}
+        disabled={loader}
         style={{
-          backgroundColor: "#10B981",
+          backgroundColor: loader ? "#6EE7B7" : "#10B981",
           color: "white",
           padding: "0.5rem 1rem",
           borderRadius: "0.375rem",
-          cursor: "pointer",
+          cursor: loader ? "not-allowed" : "pointer",
           border: "none",
+          opacity: loader ? 0.7 : 1,
         }}
       >
-        Download Resume
+        {loader ? "Generating PDF..." : "Download Resume"}
       </button>
 
       <div
@@ -260,9 +274,7 @@ const ResumePreview = () => {
                         marginBottom: "0.25rem",
                       }}
                     >
-                      <p>
-                        {edu.degree}
-                      </p>
+                      <p>{edu.degree}</p>
                       <p>
                         {edu.startdate} — {edu.enddate}
                       </p>
@@ -314,9 +326,11 @@ const ResumePreview = () => {
                       >
                         {pro.projectname}
                       </h3>
-                      <p style={{
-                        color: "black"
-                      }}>
+                      <p
+                        style={{
+                          color: "black",
+                        }}
+                      >
                         {pro.startdate} — {pro.enddate}
                       </p>
                     </div>
