@@ -1,22 +1,26 @@
-import Image from "next/image";
+"use client";
+
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const slides = [
   {
-    image: "https://helloi.ai/wp-content/uploads/elementor/thumbs/ai-resume-builder-qpa8fir5niayzt9g03ab11oc3hj0t0ooz716qqyfs6.jpeg",
+    bg: "from-blue-600 via-indigo-600 to-purple-600",
     title: "Build Resume",
     subtitle: "AI-powered suggestions",
+    icon: "📝",
   },
   {
-    image: "https://www.flexjobs.com/blog/wp-content/uploads/2019/03/10061416/set-apart.png",
+    bg: "from-pink-500 via-red-500 to-orange-500",
     title: "Stand Out",
     subtitle: "Make your CV shine fast",
+    icon: "🚀",
   },
   {
-    image: "https://www.shutterstock.com/image-photo/youre-hired-260nw-623590175.jpg",
+    bg: "from-cyan-500 via-blue-500 to-indigo-600",
     title: "Get Noticed",
     subtitle: "Smart templates & designs",
+    icon: "✨",
   },
 ];
 
@@ -31,7 +35,7 @@ const BannerSlider = () => {
   }, []);
 
   return (
-    <div className="relative w-full h-[60vh] md:h-[70vh] lg:h-[80vh] overflow-hidden">
+    <div className="relative w-full h-[60vh] md:h-[70vh] lg:h-[80vh] overflow-hidden mt-20">
       <AnimatePresence mode="wait">
         <motion.div
           key={index}
@@ -39,17 +43,18 @@ const BannerSlider = () => {
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -100 }}
           transition={{ duration: 1 }}
-          className="absolute w-full h-full"
+          className={`absolute w-full h-full bg-linear-to-br ${slides[index].bg} flex items-center justify-center text-center px-4`}
         >
-          <Image
-            src={slides[index].image}
-            alt={slides[index].title}
-            layout="fill"
-            objectFit="cover"
-            objectPosition="center"
-            priority
-          />
-          <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center text-center px-4">
+          <div className="flex flex-col items-center">
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.2, duration: 0.5 }}
+              className="text-6xl md:text-7xl mb-4"
+            >
+              {slides[index].icon}
+            </motion.div>
+
             <motion.h2
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
@@ -58,6 +63,7 @@ const BannerSlider = () => {
             >
               {slides[index].title}
             </motion.h2>
+
             <motion.p
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
@@ -70,6 +76,7 @@ const BannerSlider = () => {
         </motion.div>
       </AnimatePresence>
 
+      {/* Dots */}
       <div className="absolute bottom-4 md:bottom-8 w-full flex justify-center gap-3">
         {slides.map((_, i) => (
           <span

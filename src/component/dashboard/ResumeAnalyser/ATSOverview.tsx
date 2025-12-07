@@ -91,7 +91,7 @@ const ATSOverview = () => {
 
           {/* Suggestions */}
           <div
-            className={`w-full p-6 rounded-xl shadow-md mb-10 bg-gradient-to-r ${
+            className={`w-full p-6 rounded-xl shadow-md mb-10 bg-linear-to-r ${
               atsString.atsScore >= 80
                 ? "from-green-100 to-green-50"
                 : atsString.atsScore >= 50
@@ -144,7 +144,7 @@ const ATSOverview = () => {
 
           {/* Missing Keywords */}
           <div
-            className={`w-full p-6 rounded-xl shadow-md mb-10 bg-gradient-to-r ${
+            className={`w-full p-6 rounded-xl shadow-md mb-10 bg-linear-to-r ${
               atsString.atsScore >= 80
                 ? "from-green-100 to-green-50"
                 : atsString.atsScore >= 50

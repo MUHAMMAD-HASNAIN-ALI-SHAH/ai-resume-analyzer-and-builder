@@ -13,6 +13,8 @@ const Signin = () => {
               src="/logo.png"
               alt="Logo"
               className="w-full h-full object-cover"
+              width={40}
+              height={40}
             />
           </div>
           <span className="ml-3 text-xl sm:text-2xl font-semibold text-blue-800">
