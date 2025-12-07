@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import puppeteer from "puppeteer";
+import chromium from "@sparticuz/chromium";
 
 // ==========================
 //      TYPES
@@ -194,9 +195,11 @@ export async function POST(req: Request) {
 
     const html = generateResumeHTML(data);
 
+    // Launch Chromium (Vercel-compatible)
     const browser = await puppeteer.launch({
+      args: chromium.args,
+      executablePath: await chromium.executablePath(),
       headless: true,
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
 
     const page = await browser.newPage();
@@ -209,7 +212,7 @@ export async function POST(req: Request) {
 
     await browser.close();
 
-    return new Response(Buffer.from(pdfBuffer), {
+   return new Response(Buffer.from(pdfBuffer), {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
@@ -219,7 +222,7 @@ export async function POST(req: Request) {
   } catch (error: unknown) {
     const err = error as Error;
 
-    console.error(err);
+    console.error("PDF Generation Error:", err);
 
     return NextResponse.json(
       {
@@ -230,3 +233,4 @@ export async function POST(req: Request) {
     );
   }
 }
+
