@@ -67,7 +67,7 @@ Resume Analyzer & Builder is a web application that helps users create professio
 
 #### Analysis Report
 
-![Resume Builder](./public/RM4.png)
+![Resume Builder](./public/RM5.png)
 
 ## 📄 License
 
