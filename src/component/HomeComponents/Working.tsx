@@ -19,19 +19,19 @@ const Working = () => {
       <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-8">
         {[
           {
-            title: "Write Prompt",
+            title: "Build Resume",
             icon: "📝",
-            text: "Quickly generate a tailored prompt for your form using AI.",
+            text: "Create a professional resume in seconds with our resume builder.",
           },
           {
             title: "Edit & Customize",
             icon: "✏️",
-            text: "Fine-tune the generated content with an intuitive editor.",
+            text: "Easily edit and customize your resume to fit any job application.",
           },
           {
-            title: "Share & Collect",
+            title: "Resume Analysis",
             icon: "🔗",
-            text: "Share your form and collect professional responses seamlessly.",
+            text: "Get detailed insights and feedback on your resume.",
           },
         ].map((card, idx) => (
           <motion.article

@@ -3,6 +3,35 @@ import pdfToText from "react-pdftotext";
 import { toast } from "react-toastify";
 import ai from "@/lib/gemini";
 
+/* ---------- Keyword Extraction Utils (NO AI) ---------- */
+
+const STOP_WORDS = new Set([
+  "and", "or", "the", "a", "an", "to", "of", "in", "for", "with",
+  "on", "at", "by", "from", "as", "is", "are", "was", "were",
+  "this", "that", "it", "be", "has", "have", "had"
+]);
+
+const extractKeywords = (text: string): string[] => {
+  if (!text) return [];
+
+  return Array.from(
+    new Set(
+      text
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, " ")
+        .split(/\s+/)
+        .filter(
+          (word) =>
+            word.length > 2 &&
+            !STOP_WORDS.has(word) &&
+            isNaN(Number(word))
+        )
+    )
+  );
+};
+
+/* ---------- Store Types ---------- */
+
 interface ResumeAnalyserState {
   form: {
     companyName: string;
@@ -25,6 +54,8 @@ interface ResumeAnalyserState {
   getResumeATSScore: () => Promise<void>;
   reset: () => void;
 }
+
+/* ---------- Zustand Store ---------- */
 
 const useResumeAnalyserStore = create<ResumeAnalyserState>((set, get) => ({
   form: {
@@ -74,7 +105,6 @@ const useResumeAnalyserStore = create<ResumeAnalyserState>((set, get) => ({
   },
 
   getResumeATSScore: async () => {
-    console.log("Starting ATS score retrieval...");
     const { form } = get();
 
     if (!form.file) {
@@ -90,72 +120,62 @@ const useResumeAnalyserStore = create<ResumeAnalyserState>((set, get) => ({
     try {
       set({ submitting: true, submitForAnalysis: true });
 
-      // 1️⃣ Extract Resume Keywords
-      const aiExKeyWordFromResume = await ai.models.generateContent({
-        model: "gemini-2.0-flash",
+      /* ---------- Local Keyword Extraction ---------- */
+
+      const resumeKeywords = extractKeywords(form.extractedText);
+
+      const jdCombinedText = `
+        ${form.companyName}
+        ${form.positiontitle}
+        ${form.companyDescription}
+      `;
+
+      const descriptionKeywords = extractKeywords(jdCombinedText);
+
+      /* ---------- SINGLE Gemini Call (ATS Reasoning) ---------- */
+
+      const aiATSResult: any = await ai.models.generateContent({
+        model: "gemini-2.5-flash",
         contents: `
-          You are a strict keyword extraction engine.
-          Extract keywords from the resume text.
-          Return ONLY JSON array like:
-          ["keyword1", "keyword2"]
+          You are an ATS resume analyzer.
 
-          Resume text:
-          ${form.extractedText}
-        `,
-      });
+          Compare the following keyword sets semantically (not just exact matches).
 
-      // 2️⃣ Extract Job Description Keywords
-      const aiExKeyWordFromDescription = await ai.models.generateContent({
-        model: "gemini-2.0-flash",
-        contents: `
-          Extract keywords from:
-          - Company Name
-          - Position Title
-          - Company Description
-          Return ONLY JSON array.
+          Position for applying: ${form.positiontitle}
+          Company Name: ${form.companyName}
 
-          Input:
-          ${form.companyName}
-          ${form.positiontitle}
-          ${form.companyDescription}
-        `,
-      });
+          Resume Keywords:
+          ${JSON.stringify(resumeKeywords)}
 
-      const resumeKeywords = JSON.parse(
-        (aiExKeyWordFromResume.text ?? "[]")
-          .replace(/```json/g, "")
-          .replace(/```/g, "")
-          .trim()
-      );
+          Job Description Keywords:
+          ${JSON.stringify(descriptionKeywords)}
 
-      const descriptionKeywords = JSON.parse(
-        (aiExKeyWordFromDescription.text ?? "[]")
-          .replace(/```json/g, "")
-          .replace(/```/g, "")
-          .trim()
-      );
+          Rules:
+          - Consider synonyms and related skills.
+          - Penalize missing critical job-related skills.
+          - If job description keywords are few or empty, focus mainly on resume strength.
 
-      // 3️⃣ Compare Keywords + Generate ATS Result
-      const aiATSResult = await ai.models.generateContent({
-        model: "gemini-2.0-flash",
-        contents: `
-          You are an ATS analyzer.
-          Compare:
-
-          Resume Keywords: ${JSON.stringify(resumeKeywords)}
-          Job Keywords: ${JSON.stringify(descriptionKeywords)}
-
-          Return JSON:
+          Respond ONLY in this JSON format:
           {
             "atsScore": number,
-            "atsPoints": [{ "point": "", "description": "" }],
-            "atsMissingKeywords": [{ "missingKeyword": "", "reason": "" }]
+            "atsPoints": [
+              {
+                "point": "point title about negative aspect",
+                "description": "detailed explanation"
+              }
+            ],
+            "atsMissingKeywords": [
+              {
+                "missingKeyword": "keyword",
+                "reason": "why it's important"
+              }
+            ],
           }
         `,
       });
 
       const atsResult = JSON.parse(
-        (aiATSResult.text ?? "{}")
+        aiATSResult.text
           .replace(/```json/g, "")
           .replace(/```/g, "")
           .trim()
@@ -168,12 +188,12 @@ const useResumeAnalyserStore = create<ResumeAnalyserState>((set, get) => ({
           atsKeywords: resumeKeywords,
           atsMissingKeywords: atsResult.atsMissingKeywords,
         },
+        submitting: false,
       });
-
-      set({ submitForAnalysis: true, submitting: false });
     } catch (error) {
       console.error("Error fetching ATS score:", error);
       toast.error("Failed to get ATS score");
+      set({ submitting: false });
     }
   },
 
@@ -187,6 +207,7 @@ const useResumeAnalyserStore = create<ResumeAnalyserState>((set, get) => ({
         extractedText: "",
       },
       submitForAnalysis: false,
+      submitting: false,
       atsString: {
         atsScore: 0,
         atsPoints: [],
