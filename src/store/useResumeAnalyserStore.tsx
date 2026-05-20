@@ -3,6 +3,22 @@ import pdfToText from "react-pdftotext";
 import { toast } from "react-toastify";
 import ai from "@/lib/gemini";
 
+interface ATSPoint {
+  point: string;
+  description: string;
+}
+
+interface ATSMissingKeyword {
+  missingKeyword: string;
+  reason: string;
+}
+
+interface ATSResult {
+  atsScore: number;
+  atsPoints: ATSPoint[];
+  atsMissingKeywords: ATSMissingKeyword[];
+}
+
 /* ---------- Keyword Extraction Utils (NO AI) ---------- */
 
 const STOP_WORDS = new Set([
@@ -134,7 +150,7 @@ const useResumeAnalyserStore = create<ResumeAnalyserState>((set, get) => ({
 
       /* ---------- SINGLE Gemini Call (ATS Reasoning) ---------- */
 
-      const aiATSResult: any = await ai.models.generateContent({
+      const aiATSResult = await ai.models.generateContent({
         model: "gemini-2.5-flash",
         contents: `
           You are an ATS resume analyzer.
@@ -174,8 +190,8 @@ const useResumeAnalyserStore = create<ResumeAnalyserState>((set, get) => ({
         `,
       });
 
-      const atsResult = JSON.parse(
-        aiATSResult.text
+      const atsResult: ATSResult = JSON.parse(
+        (aiATSResult.text || "")
           .replace(/```json/g, "")
           .replace(/```/g, "")
           .trim()
