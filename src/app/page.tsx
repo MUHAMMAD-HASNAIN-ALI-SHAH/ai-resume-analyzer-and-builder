@@ -1,16 +1,22 @@
-import BannerSlider from "@/component/HomeComponents/BannerSlider";
-import Footer from "@/component/HomeComponents/Footer";
-import Hero from "@/component/HomeComponents/Hero";
-import Navbar from "@/component/HomeComponents/Navbar";
-import Working from "@/component/HomeComponents/Working";
+import Navbar from "@/component/HomePageComponents/Navbar";
+import Hero from "@/component/HomePageComponents/Hero";
+import Features from "@/component/HomePageComponents/Features";
+import Steps from "@/component/HomePageComponents/Steps";
+import CTA from "@/component/HomePageComponents/CTA";
+import Testimonials from "@/component/HomePageComponents/Testimonials";
+import Footer from "@/component/HomePageComponents/Footer";
+import Newsletter from "@/component/HomePageComponents/Newsletter";
 
 export default function Home() {
   return (
-    <div className="bg-linear-to-b from-white via-[#c9eeff] to-[#bfe1ff] flex flex-col">
+    <div className="">
       <Navbar />
-      <BannerSlider />
       <Hero />
-      <Working />
+      <Features />
+      <Steps />
+      <CTA />
+      <Testimonials />
+      <Newsletter />
       <Footer />
     </div>
   );

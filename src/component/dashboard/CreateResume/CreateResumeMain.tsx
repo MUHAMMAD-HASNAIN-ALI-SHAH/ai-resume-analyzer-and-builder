@@ -13,13 +13,12 @@ const CreateResumeMain = () => {
     reset();
   }, [reset]);
   return (
-    <div className="flex flex-col xl:flex-row justify-between items-start gap-1 h-full w-full px-5 py-7">
-      <div className="w-full xl:w-[40%] px-0">
-        <CreateResumeHeader />
-        <CreateResumeForm />
-      </div>
+    <div className="flex flex-col justify-between items-center gap-1 h-full w-full px-2 xl:px-5 py-3 xl:py-7">
 
-      <div className="w-full xl:w-[60%] pt-10 xl:pb-0">
+      <CreateResumeHeader />
+      <CreateResumeForm />
+
+      <div className="w-full pt-10 xl:pb-0 hidden lg:block">
         <ResumePreview />
       </div>
     </div>

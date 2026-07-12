@@ -7,7 +7,7 @@ const ATSOverview = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   const radius = 80;
-  const circumference = Math.PI * radius; // Half circle
+  const circumference = Math.PI * radius;
   const offset = circumference - (atsString.atsScore / 100) * circumference;
 
   let scoreColor = "red-500";
@@ -19,7 +19,7 @@ const ATSOverview = () => {
       {submitting && (
         <div className="flex flex-col items-center justify-center h-96 w-full bg-white rounded-lg shadow-md">
           <div className="animate-spin">
-            <Loader2 className="h-12 w-12 text-blue-500" />
+            <Loader2 className="h-12 w-12 text-blue-800" />
           </div>
             <span className="ml-4 text-gray-600">Analyzing your resume...</span>
         </div>

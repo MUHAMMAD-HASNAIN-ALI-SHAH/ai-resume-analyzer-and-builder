@@ -1,44 +1,9 @@
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import useCreateResumeStore from "../../../store/useCreateResumeStore";
 
 const ResumePreview = () => {
   const { form } = useCreateResumeStore();
   const resumeRef = useRef<HTMLDivElement>(null);
-  const [loader, setLoader] = useState(false);
-
-  const onSubmit = async () => {
-    if (loader) return;
-
-    setLoader(true);
-    try {
-      const res = await fetch("/api/create-resume", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-
-      if (!res.ok) {
-        console.error("Failed to generate PDF");
-        alert("Failed to generate PDF");
-        return;
-      }
-
-      const blob = await res.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "resume.pdf";
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error("Error:", error);
-      alert("Something went wrong");
-    } finally {
-      setLoader(false);
-    }
-  };
 
   return (
     <div
@@ -52,23 +17,6 @@ const ResumePreview = () => {
         zIndex: 50,
       }}
     >
-      <button
-        type="button"
-        onClick={onSubmit}
-        disabled={loader}
-        style={{
-          backgroundColor: loader ? "#6EE7B7" : "#10B981",
-          color: "white",
-          padding: "0.5rem 1rem",
-          borderRadius: "0.375rem",
-          cursor: loader ? "not-allowed" : "pointer",
-          border: "none",
-          opacity: loader ? 0.7 : 1,
-        }}
-      >
-        {loader ? "Generating PDF..." : "Download Resume"}
-      </button>
-
       <div
         style={{
           backgroundColor: "white",

@@ -18,12 +18,12 @@ const Signin = () => {
             />
           </div>
           <span className="ml-3 text-xl sm:text-2xl font-semibold text-blue-800">
-            Resume Werse
+            JobX
           </span>
         </div>
 
         <h1 className="text-2xl sm:text-3xl font-bold mb-4 text-blue-900">
-          Welcome to Resume Werse
+          Welcome to JobX
         </h1>
         <p className="text-gray-700 text-sm sm:text-base max-w-md mx-auto lg:mx-0">
           Create your account to start building your resume. Please fill out the

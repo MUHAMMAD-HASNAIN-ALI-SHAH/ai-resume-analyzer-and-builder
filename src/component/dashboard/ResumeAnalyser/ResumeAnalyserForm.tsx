@@ -17,7 +17,7 @@ const ResumeAnalyserForm = () => {
     <>
       <div className="mt-10 grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-3xl mx-auto">
         {/* Upload Resume Button */}
-        <div className="flex flex-col gap-6 p-8 bg-white rounded-xl shadow hover:shadow-lg transition border border-gray-200 hover:border-blue-400 w-full max-w-lg mx-auto">
+        <div className="flex flex-col gap-6 p-8 bg-white rounded-xl shadow hover:shadow-lg transition border border-gray-200 hover:border-blue-600 w-full max-w-lg mx-auto">
           {/* Company Name */}
           <div className="w-full">
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -27,7 +27,7 @@ const ResumeAnalyserForm = () => {
               type="text"
               onChange={handleFormStrings}
               placeholder="Enter company name"
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition"
+              className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-200 transition"
             />
           </div>
           <div className="w-full">
@@ -40,7 +40,7 @@ const ResumeAnalyserForm = () => {
               onChange={handleFormStrings}
               value={form.positiontitle}
               placeholder="Enter position title"
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition"
+              className="w-full border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-200 transition"
             />
           </div>
 
@@ -55,14 +55,14 @@ const ResumeAnalyserForm = () => {
               value={form.companyDescription}
               placeholder="Enter a brief company description"
               rows={4}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 resize-none focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition"
+              className="w-full border border-gray-200 rounded-lg px-4 py-2 resize-none focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-200 transition"
             />
           </div>
 
           {/* Submit Button */}
           <button
             onClick={getResumeATSScore}
-            className="w-full bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg shadow hover:bg-blue-600 transition"
+            className="w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow cursor-pointer hover:bg-blue-700 transition"
           >
             Analyze Resume
           </button>
@@ -72,7 +72,7 @@ const ResumeAnalyserForm = () => {
         <button
           type="button"
           onClick={handleButtonClick}
-          className="flex flex-col items-center justify-center p-8 bg-white rounded-xl shadow hover:shadow-lg transition border border-gray-200 hover:border-blue-400"
+          className="flex flex-col items-center justify-center p-8 bg-white rounded-xl shadow hover:shadow-lg transition border border-gray-200 hover:border-blue-600"
         >
           {!form.file && (
             <>

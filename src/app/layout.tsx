@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Resume Werse - Create and analyze your resumes with AI",
+  title: "JobX - Create and analyze your resumes with AI",
   description:
     "Create professional resumes effortlessly with AI-powered tools. Analyze, build, and optimize your CVs for better job opportunities.",
 };
@@ -27,7 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white`}
       >
         <ToastContainer />
         {children}

@@ -1,10 +1,8 @@
-import CopyWriteLine from "@/component/dashboard/DashboardMain/CopywriteLine";
-import Features from "@/component/dashboard/DashboardMain/FeatureBox";
-import HowItWorks from "@/component/dashboard/DashboardMain/Guidance";
-import DashboardHeroButtons from "@/component/dashboard/DashboardMain/DashboardHeroButtons";
-import Navbar from "@/component/dashboard/Navbar";
 import { auth } from "@/lib/auth";
 import { Loader2 } from "lucide-react";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/component/dashboard/AppSidebar";
+import MainContent from "@/component/dashboard/MainContent";
 
 const page = async () => {
   const user = await auth();
@@ -22,28 +20,16 @@ const page = async () => {
 
   return (
     <div className="min-h-screen bg-white">
-      <Navbar />
-      {/* Hero Section */}
-      <div className="w-full max-w-5xl mx-auto pt-36 px-4 text-center bg-white">
-        <h1 className="text-3xl sm:text-4xl font-bold text-gray-800">
-          Welcome,{" "}
-          <span className="text-blue-500">{user.user?.name || "User"}</span> 👋
-        </h1>
-        <p className="mt-3 text-lg text-gray-600 max-w-2xl mx-auto">
-          Manage your resumes, analyze for ATS optimization, and export them
-          professionally.
-        </p>
-
-        {/* Action Buttons */}
-        <DashboardHeroButtons />
-      </div>
-      <div className=" w-full mt-20 bg-linear-to-b from-purple-500 to-indigo-600">
-        <Features />
-        <HowItWorks />
-      </div>
-      <CopyWriteLine />
+      <SidebarProvider>
+        <AppSidebar />
+        <main className="w-full">
+          <SidebarTrigger />
+          <MainContent />
+        </main>
+      </SidebarProvider>
     </div>
   );
 };
 
 export default page;
+
